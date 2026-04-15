@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portugal Retirement Advisor Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── reset & tokens ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0D1F3C;--navy-mid:#1A3460;--navy-light:#2F5496;
+  --teal:#0E6E56;--teal-light:#1D9E75;--teal-bg:#E2EFDA;
+  --amber:#854F0B;--amber-bg:#FFF2CC;
+  --coral:#993C1D;--coral-bg:#FAECE7;
+  --red:#A32D2D;--red-bg:#FCEBEB;
+  --slate:#F4F6FA;--white:#FFFFFF;
+  --border:#DDE3EE;--border-mid:#C5CEDF;
+  --text:#0D1F3C;--text-mid:#3D5275;--text-muted:#6B7FA3;
+  --font-display:'DM Serif Display',serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+  --radius:8px;--radius-lg:12px;--radius-xl:16px;
+  --shadow:0 1px 3px rgba(13,31,60,.08),0 4px 12px rgba(13,31,60,.06);
+  --shadow-lg:0 4px 16px rgba(13,31,60,.12),0 12px 40px rgba(13,31,60,.08);
+}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);color:var(--text);background:var(--slate);min-height:100vh}
+
+/* ── layout ── */
+.app{display:flex;min-height:100vh}
+.sidebar{width:260px;flex-shrink:0;background:var(--navy);padding:0;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.main{flex:1;min-width:0;padding:2rem 2.5rem;max-width:900px}
+
+/* ── sidebar ── */
+.sidebar-brand{padding:1.75rem 1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.08)}
+.sidebar-brand .flag{font-size:22px;margin-bottom:.5rem}
+.sidebar-brand h1{font-family:var(--font-display);font-size:18px;color:#fff;line-height:1.25;font-style:italic}
+.sidebar-brand p{font-size:11px;color:rgba(255,255,255,.45);margin-top:.35rem;line-height:1.4;letter-spacing:.02em}
+.sidebar-section{padding:.75rem 1rem .25rem;font-size:10px;font-weight:600;letter-spacing:.1em;color:rgba(255,255,255,.3);text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:.6rem 1.25rem;cursor:pointer;transition:all .15s;border-left:3px solid transparent;font-size:13.5px;color:rgba(255,255,255,.6);font-weight:400;line-height:1.3}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--teal-light);font-weight:500}
+.nav-item .nav-icon{font-size:15px;opacity:.7;width:18px;text-align:center;flex-shrink:0}
+.nav-item.active .nav-icon{opacity:1}
+.sidebar-updated{margin-top:auto;padding:1rem 1.25rem;font-size:10px;color:rgba(255,255,255,.25);border-top:1px solid rgba(255,255,255,.06)}
+
+/* ── page header ── */
+.page-header{margin-bottom:2rem}
+.page-header .breadcrumb{font-size:11px;color:var(--text-muted);letter-spacing:.04em;text-transform:uppercase;margin-bottom:.5rem}
+.page-header h2{font-family:var(--font-display);font-size:28px;color:var(--navy);font-style:italic;line-height:1.2}
+.page-header p{font-size:14px;color:var(--text-mid);margin-top:.4rem;line-height:1.6;max-width:640px}
+
+/* ── panels ── */
+.panel{display:none}
+.panel.active{display:block}
+
+/* ── alerts ── */
+.alert{border-radius:var(--radius);padding:.75rem 1rem;font-size:13px;line-height:1.6;margin-bottom:1.25rem;border-left:3px solid}
+.alert strong{font-weight:600}
+.alert.danger{background:var(--red-bg);color:#6B1F1F;border-color:var(--red)}
+.alert.warn{background:var(--amber-bg);color:#5C3000;border-color:var(--amber)}
+.alert.info{background:#EEF4FD;color:#1A3460;border-color:var(--navy-light)}
+.alert.green{background:var(--teal-bg);color:#0B4A38;border-color:var(--teal-light)}
+
+/* ── stat cards ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.125rem;box-shadow:var(--shadow)}
+.stat-card .s-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.375rem}
+.stat-card .s-val{font-family:var(--font-display);font-size:24px;color:var(--navy);line-height:1}
+.stat-card .s-sub{font-size:11px;color:var(--text-muted);margin-top:.3rem;line-height:1.4}
+.stat-card.changed .s-label{color:var(--coral)}
+.stat-card.changed .s-val{color:var(--coral)}
+
+/* ── section heading ── */
+.section-title{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.875rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+
+/* ── topic grid ── */
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.625rem;margin-bottom:1.5rem}
+.topic-btn{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1rem;cursor:pointer;text-align:left;transition:all .15s;box-shadow:var(--shadow)}
+.topic-btn:hover{border-color:var(--navy-light);transform:translateY(-1px);box-shadow:var(--shadow-lg)}
+.topic-btn.active{border-color:var(--navy-light);background:#EEF4FD}
+.topic-btn .t-icon{font-size:18px;margin-bottom:.375rem}
+.topic-btn .t-name{font-size:13px;font-weight:500;color:var(--navy);line-height:1.3}
+.topic-btn .t-desc{font-size:11px;color:var(--text-muted);margin-top:.2rem;line-height:1.35}
+.badge-updated{display:inline-block;font-size:9px;font-weight:600;background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:3px;margin-left:4px;vertical-align:middle;letter-spacing:.03em}
+
+/* ── knowledge content ── */
+.kb-content{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;box-shadow:var(--shadow)}
+.kb-content .kc-title{font-family:var(--font-display);font-size:20px;color:var(--navy);font-style:italic;margin-bottom:1.25rem}
+.kb-content p{font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:.875rem}
+.kb-content ul{padding-left:1.25rem;margin-bottom:1rem}
+.kb-content ul li{font-size:14px;line-height:1.75;color:var(--text-mid);margin-bottom:.25rem}
+.kb-content strong{font-weight:600;color:var(--text)}
+
+/* ── ref cards ── */
+.ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.625rem;margin-bottom:1.25rem}
+.ref-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:.875rem 1rem;box-shadow:var(--shadow)}
+.ref-card .rc-badge{font-size:10px;font-weight:600;letter-spacing:.04em;margin-bottom:.375rem}
+.ref-card .rc-title{font-size:13px;font-weight:500;color:var(--navy);margin-bottom:.3rem;line-height:1.3}
+.ref-card .rc-body{font-size:12px;color:var(--text-muted);line-height:1.5}
+
+/* ── rate table ── */
+.rate-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1.25rem}
+.rate-table th{text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:.5rem .625rem;border-bottom:2px solid var(--border)}
+.rate-table td{padding:.5rem .625rem;border-bottom:1px solid var(--border);color:var(--text)}
+.rate-table tr:last-child td{border-bottom:none}
+.rate-table .hi{color:var(--red);font-weight:600}
+.rate-table .lo{color:var(--teal);font-weight:600}
+.rate-table .mid{color:var(--amber);font-weight:600}
+.rate-table .section-row td{background:var(--slate);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);padding:.35rem .625rem}
+
+/* ── scenarios ── */
+.scenario-select{margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem;flex-wrap:wrap}
+.scenario-select label{font-size:13px;color:var(--text-muted);font-weight:500}
+.scenario-select select{font-size:13px;padding:.45rem .75rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text);cursor:pointer}
+.scenario-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.sc-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem;box-shadow:var(--shadow)}
+.sc-card h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:.625rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.sc-row{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:12px}
+.sc-row:last-child{border-bottom:none}
+.sc-key{color:var(--text-mid)}
+.sc-val{font-weight:500;text-align:right;font-size:11px;max-width:55%}
+.sc-val.green{color:var(--teal)}
+.sc-val.red{color:var(--red)}
+.sc-val.amber{color:var(--amber)}
+
+/* ── ask advisor ── */
+.ask-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;box-shadow:var(--shadow)}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.chip{font-size:12px;padding:.3rem .75rem;border-radius:20px;border:1px solid var(--border);background:var(--slate);color:var(--text-mid);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--navy-light);background:#EEF4FD;color:var(--navy)}
+.ask-row{display:flex;gap:.5rem;margin-top:.75rem}
+.ask-row input{flex:1;font-size:14px;padding:.55rem .875rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--slate);color:var(--text);outline:none;font-family:var(--font-body)}
+.ask-row input:focus{border-color:var(--navy-light);background:var(--white);box-shadow:0 0 0 3px rgba(47,84,150,.12)}
+.ask-row button{font-size:13px;padding:.55rem 1.125rem;border-radius:var(--radius);border:1px solid var(--navy-light);background:var(--navy);color:var(--white);cursor:pointer;font-weight:500;font-family:var(--font-body);transition:all .15s;white-space:nowrap}
+.ask-row button:hover{background:var(--navy-mid)}
+.answer-box{margin-top:1rem;padding:1rem 1.125rem;background:var(--slate);border-radius:var(--radius);font-size:14px;line-height:1.75;color:var(--text-mid);display:none;border-left:3px solid var(--navy-light)}
+.answer-box.loading{color:var(--text-muted);font-style:italic}
+
+/* ── checklist ── */
+.checklist-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem}
+.progress-bar{height:5px;background:var(--border);border-radius:3px;margin-bottom:1.5rem;overflow:hidden}
+.progress-fill{height:100%;background:var(--teal-light);border-radius:3px;transition:width .3s}
+.cl-list{list-style:none}
+.cl-item{display:flex;gap:.75rem;padding:.625rem 0;border-bottom:1px solid var(--border);align-items:flex-start}
+.cl-item:last-child{border-bottom:none}
+.cl-box{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--border-mid);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;background:var(--white);margin-top:1px;transition:all .15s}
+.cl-box:hover{border-color:var(--teal-light)}
+.cl-box.done{background:var(--teal-light);border-color:var(--teal-light)}
+.cl-box.done::after{content:'✓';font-size:11px;color:white;font-weight:700}
+.cl-label{font-size:13.5px;color:var(--text);line-height:1.4}
+.cl-label.done{color:var(--text-muted);text-decoration:line-through}
+.cl-meta{font-size:11px;color:var(--text-muted);margin-top:.2rem;line-height:1.4}
+.tag{display:inline-block;font-size:10px;font-weight:600;padding:1px 6px;border-radius:3px;margin-left:5px;letter-spacing:.03em;vertical-align:middle}
+.tag.urgent{background:var(--coral-bg);color:var(--coral)}
+.tag.tax{background:#EEF4FD;color:var(--navy-light)}
+.tag.visa{background:var(--teal-bg);color:var(--teal)}
+.tag.banking{background:var(--amber-bg);color:var(--amber)}
+
+/* ── roth module ── */
+.roth-tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.roth-tab{font-size:12px;padding:.35rem .875rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text-muted);cursor:pointer;transition:all .15s}
+.roth-tab:hover{background:var(--slate)}
+.roth-tab.active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.roth-panel{display:none}
+.roth-panel.active{display:block}
+.split-visual{display:flex;height:32px;border-radius:var(--radius);overflow:hidden;margin:.75rem 0 .375rem}
+.split-exempt{background:var(--teal-light);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:600;transition:width .4s}
+.split-taxable{background:var(--red);display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:600;transition:width .4s}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.875rem}
+.cf label{font-size:11px;color:var(--text-muted);font-weight:500;display:block;margin-bottom:.3rem}
+.cf input,.cf select{width:100%;font-size:13px;padding:.45rem .7rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text);font-family:var(--font-body)}
+.calc-btn{font-size:13px;padding:.5rem 1.25rem;border-radius:var(--radius);border:none;background:var(--navy);color:var(--white);cursor:pointer;font-weight:500;font-family:var(--font-body);transition:background .15s}
+.calc-btn:hover{background:var(--navy-mid)}
+.results-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.625rem;margin-top:1rem}
+.res-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem .875rem}
+.res-card .rl{font-size:10px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.25rem}
+.res-card .rv{font-size:20px;font-weight:600;color:var(--navy)}
+.res-card .rs{font-size:10px;color:var(--text-muted);margin-top:.2rem}
+.res-card.green{border-color:#9FE1CB;background:var(--teal-bg)}
+.res-card.green .rv{color:var(--teal)}
+.res-card.red{border-color:#F0AAAA;background:var(--red-bg)}
+.res-card.red .rv{color:var(--red)}
+.res-card.amber{border-color:#F0C060;background:var(--amber-bg)}
+.res-card.amber .rv{color:var(--amber)}
+
+/* ── handoff ── */
+.specialist-list{display:flex;flex-direction:column;gap:.625rem}
+.specialist-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.125rem;display:flex;gap:.875rem;align-items:flex-start;box-shadow:var(--shadow)}
+.sp-avatar{width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px}
+.sp-avatar.blue{background:#EEF4FD}
+.sp-avatar.teal{background:var(--teal-bg)}
+.sp-avatar.amber{background:var(--amber-bg)}
+.sp-avatar.coral{background:var(--coral-bg)}
+.sp-name{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:.2rem}
+.sp-desc{font-size:12px;color:var(--text-muted);line-height:1.5}
+.sp-when{display:inline-block;font-size:11px;background:#EEF4FD;color:var(--navy-light);padding:.15rem .6rem;border-radius:3px;margin-top:.375rem;font-weight:500}
+
+/* ── timeline ── */
+.tl-select{margin-bottom:1.25rem;display:flex;align-items:center;gap:.75rem}
+.tl-select label{font-size:13px;color:var(--text-muted);font-weight:500}
+.tl-select select{font-size:13px;padding:.45rem .75rem;border-radius:var(--radius);border:1px solid var(--border);background:var(--white);color:var(--text)}
+.tl-wrap{position:relative}
+.tl-item{display:flex;gap:1rem;margin-bottom:0;position:relative}
+.tl-left{display:flex;flex-direction:column;align-items:center;width:20px;flex-shrink:0}
+.tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:3px;z-index:1}
+.tl-line{width:2px;flex:1;min-height:20px;margin-top:2px}
+.tl-right{padding-bottom:1.125rem;flex:1}
+.tl-head{font-size:13px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.tl-when{font-size:10px;color:var(--text-muted);font-weight:400}
+.tl-urgent{font-size:9px;font-weight:700;background:var(--red-bg);color:var(--red);padding:1px 5px;border-radius:3px;letter-spacing:.03em;text-transform:uppercase}
+.tl-body{font-size:12px;color:var(--text-muted);margin-top:.25rem;line-height:1.55}
+
+/* ── distribution module ── */
+.pipe-flow{display:flex;align-items:stretch;gap:0;margin-bottom:1.5rem;flex-wrap:wrap}
+.pipe-box{flex:1;min-width:160px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.125rem;box-shadow:var(--shadow)}
+.pipe-arrow{display:flex;align-items:center;justify-content:center;padding:0 .5rem;font-size:20px;color:var(--text-muted);flex-shrink:0;padding-top:1.5rem}
+.pipe-box .pb-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem}
+.pipe-box .pb-title{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:.3rem}
+.pipe-box .pb-body{font-size:11.5px;color:var(--text-muted);line-height:1.5}
+.pipe-box.blue .pb-label{color:var(--navy-light)}
+.pipe-box.amber .pb-label{color:var(--amber)}
+.pipe-box.teal .pb-label{color:var(--teal)}
+
+/* ── bucket strategy ── */
+.bucket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.25rem}
+.bucket{border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
+.bucket-head{padding:.75rem 1rem}
+.bucket-head .bh-num{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.75;margin-bottom:.2rem}
+.bucket-head .bh-name{font-size:14px;font-weight:600;line-height:1.2}
+.bucket-head .bh-horizon{font-size:11px;opacity:.7;margin-top:.2rem}
+.bucket-body{padding:.875rem 1rem;background:var(--white)}
+.bucket-body .bb-purpose{font-size:11.5px;color:var(--text-muted);margin-bottom:.625rem;line-height:1.5;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.bi{display:flex;align-items:flex-start;gap:.5rem;padding:.25rem 0;font-size:12px;color:var(--text-mid)}
+.bi::before{content:'·';font-size:16px;line-height:1;color:var(--text-muted);flex-shrink:0;margin-top:-1px}
+.bucket-1 .bucket-head{background:var(--teal-bg)}
+.bucket-1 .bucket-head .bh-num{color:var(--teal)}
+.bucket-1 .bucket-head .bh-name{color:#0B4A38}
+.bucket-2 .bucket-head{background:#EEF4FD}
+.bucket-2 .bucket-head .bh-num{color:var(--navy-light)}
+.bucket-2 .bucket-head .bh-name{color:var(--navy)}
+.bucket-3 .bucket-head{background:var(--amber-bg)}
+.bucket-3 .bucket-head .bh-num{color:var(--amber)}
+.bucket-3 .bucket-head .bh-name{color:#4A2800}
+
+/* ── strategy cards ── */
+.strategy-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1rem 1.125rem;margin-bottom:.625rem;box-shadow:var(--shadow)}
+.strategy-card .sc-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.5rem}
+.strategy-card .sc-title{font-size:13.5px;font-weight:600;color:var(--navy);line-height:1.35}
+.sc-status{font-size:10px;font-weight:600;padding:.15rem .55rem;border-radius:3px;white-space:nowrap;flex-shrink:0;letter-spacing:.03em}
+.sc-status.good{background:var(--teal-bg);color:var(--teal)}
+.sc-status.mid{background:var(--amber-bg);color:var(--amber)}
+.sc-status.bad{background:var(--red-bg);color:var(--red)}
+.strategy-card .sc-body{font-size:12.5px;color:var(--text-muted);line-height:1.6}
+
+/* ── dividers ── */
+.divider{border:none;border-top:1px solid var(--border);margin:1.25rem 0}
+
+/* ── responsive ── */
+@media(max-width:800px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;flex-wrap:wrap;padding:.75rem}
+  .sidebar-brand{display:none}
+  .sidebar-section{display:none}
+  .nav-item{padding:.45rem .75rem;border-left:none;border-bottom:2px solid transparent;font-size:12px}
+  .nav-item.active{border-left:none;border-bottom-color:var(--teal-light)}
+  .main{padding:1.25rem 1rem}
+  .scenario-grid,.bucket-grid,.calc-grid{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .pipe-flow{flex-direction:column}
+  .pipe-arrow{display:none}
+}
+@media(max-width:480px){.stat-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="flag">🇵🇹</div>
+    <h1>Portugal Retirement Advisor Hub</h1>
+    <p>Training resource for US financial advisors — bridge to local specialists</p>
+  </div>
+  <div class="sidebar-section">Planning</div>
+  <div class="nav-item active" onclick="nav('overview',this)"><span class="nav-icon">◉</span>Overview</div>
+  <div class="nav-item" onclick="nav('knowledge',this)"><span class="nav-icon">📖</span>Knowledge base</div>
+  <div class="nav-item" onclick="nav('roth',this)"><span class="nav-icon">⚠</span>Roth IRA in Portugal</div>
+  <div class="nav-item" onclick="nav('distribution',this)"><span class="nav-icon">💸</span>Income distribution</div>
+  <div class="nav-item" onclick="nav('buckets',this)"><span class="nav-icon">🪣</span>Bucket strategy</div>
+  <div class="sidebar-section">Tools</div>
+  <div class="nav-item" onclick="nav('checklist',this)"><span class="nav-icon">✓</span>Client checklist</div>
+  <div class="nav-item" onclick="nav('scenarios',this)"><span class="nav-icon">👤</span>Client scenarios</div>
+  <div class="nav-item" onclick="nav('timeline',this)"><span class="nav-icon">📅</span>Pre-departure timeline</div>
+  <div class="nav-item" onclick="nav('ask',this)"><span class="nav-icon">💬</span>Ask the advisor</div>
+  <div class="sidebar-section">Handoff</div>
+  <div class="nav-item" onclick="nav('handoff',this)"><span class="nav-icon">🤝</span>Specialist referral guide</div>
+  <div class="sidebar-updated">Updated April 2026 · Verify with licensed PT counsel</div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- OVERVIEW -->
+<div id="panel-overview" class="panel active">
+  <div class="page-header">
+    <div class="breadcrumb">Planning resource</div>
+    <h2>Portugal retirement planning</h2>
+    <p>Key facts, tax landscape, and planning dimensions for US advisors preparing clients for retirement in Portugal.</p>
+  </div>
+  <div class="alert danger"><strong>NHR is closed. IFICI (NHR 2.0) does not apply to retirees.</strong> The original NHR program ended March 2025. Its replacement requires active employment in qualifying professional sectors. Passive-income retirees are subject to standard Portuguese progressive rates up to 48%. The US–Portugal tax treaty and pre-departure structuring are now the primary planning levers.</div>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="s-label">Primary visa</div><div class="s-val">D7</div><div class="s-sub">Passive income visa — ~€820/mo minimum</div></div>
+    <div class="stat-card changed"><div class="s-label">Tax regime ↑ changed</div><div class="s-val">Standard PT</div><div class="s-sub">NHR closed Mar 2025. IFICI not for retirees.</div></div>
+    <div class="stat-card"><div class="s-label">Cost of living</div><div class="s-val">~40% lower</div><div class="s-sub">vs avg US metro; Lisbon higher than interior</div></div>
+    <div class="stat-card"><div class="s-label">US–PT treaty</div><div class="s-val">In force</div><div class="s-sub">SS taxed only in US — critical protection</div></div>
+  </div>
+  <div class="section-title">Planning dimensions</div>
+  <div class="topic-grid">
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('visa')"><div class="t-icon">🛂</div><div class="t-name">Visa & residency</div><div class="t-desc">D7, Golden Visa, AIMA, NIF</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('tax')"><div class="t-icon">🧾</div><div class="t-name">Tax planning <span class="badge-updated">Updated</span></div><div class="t-desc">Standard PT rates, treaty strategy, FBAR</div></div>
+    <div class="topic-btn" onclick="nav('roth',null)"><div class="t-icon">⚠️</div><div class="t-name">Roth IRA <span class="badge-updated">Critical</span></div><div class="t-desc">Partial PT taxation — contributions vs. growth</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('retirement')"><div class="t-icon">💰</div><div class="t-name">Retirement income</div><div class="t-desc">SS, IRA/401k, pension treatment</div></div>
+    <div class="topic-btn" onclick="nav('distribution',null)"><div class="t-icon">💸</div><div class="t-name">Income distribution</div><div class="t-desc">Pipes, FX, compliance layer</div></div>
+    <div class="topic-btn" onclick="nav('buckets',null)"><div class="t-icon">🪣</div><div class="t-name">Bucket strategy</div><div class="t-desc">Cross-border adapted framework</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('healthcare')"><div class="t-icon">🏥</div><div class="t-name">Healthcare</div><div class="t-desc">SNS, private insurance, Medicare gap</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('property')"><div class="t-icon">🏡</div><div class="t-name">Property</div><div class="t-desc">Buying vs. renting, IMT, legal process</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('estate')"><div class="t-icon">📜</div><div class="t-name">Estate planning</div><div class="t-desc">Brussels IV, succession, wills</div></div>
+    <div class="topic-btn" onclick="nav('knowledge',null);setTopic('social')"><div class="t-icon">🤝</div><div class="t-name">Social Security</div><div class="t-desc">Totalization, direct deposit, treaty</div></div>
+  </div>
+  <div class="alert warn">Always defer to a Portuguese-licensed Contabilista Certificado or tax attorney for final guidance. This resource reflects general knowledge as of April 2026 and must be verified with local counsel before any client action.</div>
+</div>
+
+<!-- KNOWLEDGE BASE -->
+<div id="panel-knowledge" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Planning</div>
+    <h2>Knowledge base</h2>
+    <p>Select a topic to explore. Each module covers the key facts, current rules, and planning considerations advisors need before engaging Portuguese specialists.</p>
+  </div>
+  <div class="topic-grid" style="margin-bottom:1.25rem">
+    <div class="topic-btn active" onclick="setTopic('visa')" data-topic="visa"><div class="t-icon">🛂</div><div class="t-name">Visa & residency</div></div>
+    <div class="topic-btn" onclick="setTopic('tax')" data-topic="tax"><div class="t-icon">🧾</div><div class="t-name">Tax planning</div></div>
+    <div class="topic-btn" onclick="setTopic('retirement')" data-topic="retirement"><div class="t-icon">💰</div><div class="t-name">Retirement income</div></div>
+    <div class="topic-btn" onclick="setTopic('banking')" data-topic="banking"><div class="t-icon">🏦</div><div class="t-name">Banking</div></div>
+    <div class="topic-btn" onclick="setTopic('healthcare')" data-topic="healthcare"><div class="t-icon">🏥</div><div class="t-name">Healthcare</div></div>
+    <div class="topic-btn" onclick="setTopic('property')" data-topic="property"><div class="t-icon">🏡</div><div class="t-name">Property</div></div>
+    <div class="topic-btn" onclick="setTopic('estate')" data-topic="estate"><div class="t-icon">📜</div><div class="t-name">Estate planning</div></div>
+    <div class="topic-btn" onclick="setTopic('social')" data-topic="social"><div class="t-icon">🤝</div><div class="t-name">Social Security</div></div>
+  </div>
+  <div class="kb-content" id="kb-content"></div>
+</div>
+
+<!-- ROTH MODULE -->
+<div id="panel-roth" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Planning — Critical topic</div>
+    <h2>Roth IRA in Portugal</h2>
+    <p>Portugal does not recognize US tax-free Roth treatment. Growth is taxable as pension income. For clients with significant Roth positions, this requires explicit re-modeling.</p>
+  </div>
+  <div class="alert danger"><strong>Portugal taxes Roth IRA investment growth as pension income</strong> under CIRS Article 54. Original after-tax contributions are exempt (capital reimbursement). The growth component is taxable at progressive rates up to 48%. For a Roth held for 20+ years, growth may represent 70–85% of the account value.</div>
+  <div class="roth-tabs">
+    <div class="roth-tab active" onclick="showRoth('rules',this)">The contribution/growth split</div>
+    <div class="roth-tab" onclick="showRoth('strategies',this)">Planning strategies</div>
+    <div class="roth-tab" onclick="showRoth('calculator',this)">Distribution calculator</div>
+  </div>
+  <div id="roth-rules" class="roth-panel active">
+    <div class="ref-grid">
+      <div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Contributions (basis)</div><div class="rc-title">Exempt — CIRS Article 54</div><div class="rc-body">After-tax contributions and pre-departure conversion amounts are treated as capital reimbursement — not taxable in Portugal. Requires Form 8606 documentation.</div></div>
+      <div class="ref-card"><div class="rc-badge" style="color:var(--red)">Investment growth</div><div class="rc-title">Taxable as foreign pension income</div><div class="rc-body">Growth above contributions is classified as Category H pension income and taxed at Portugal's progressive rates (13–48%). Same treatment as traditional IRA, just on a smaller portion.</div></div>
+      <div class="ref-card"><div class="rc-badge" style="color:var(--amber)">85/15 fallback rule</div><div class="rc-title">If basis cannot be documented</div><div class="rc-body">When contribution records are unavailable, Portuguese law allows 85% to be treated as exempt capital reimbursement and only 15% to be taxed. This is a default — documentation can override it.</div></div>
+      <div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">No official PT guidance</div><div class="rc-title">Derived from CIRS by analogy</div><div class="rc-body">Portugal has issued no specific ruling on Roth IRAs. Treatment is derived by applying pension/annuity rules. A licensed Portuguese tax attorney is essential for structuring distributions correctly.</div></div>
+    </div>
+    <div class="section-title">Actual basis method vs. 85/15 fallback — when each wins</div>
+    <table class="rate-table">
+      <tr><th>Situation</th><th>Actual basis method</th><th>85/15 fallback</th><th>Use which?</th></tr>
+      <tr><td>Recent Roth — mostly contributions</td><td class="lo">Contributions &gt;85% of balance</td><td class="mid">85% exempt regardless</td><td class="lo">Actual basis (higher exemption)</td></tr>
+      <tr><td>Long-held Roth — heavily appreciated</td><td class="hi">Contributions &lt;15% of balance</td><td class="lo">85% always exempt</td><td class="lo">85/15 rule (better outcome)</td></tr>
+      <tr><td>Records incomplete or unavailable</td><td class="mid">Cannot use — no documentation</td><td class="lo">Available as of right</td><td class="lo">85/15 rule (only option)</td></tr>
+    </table>
+    <div class="alert warn"><strong>Form 8606 is the foundational document.</strong> Pull records for every year contributions or conversions were made. Build a cumulative basis ledger. This determines the tax-free portion of every future Portuguese distribution. Do not wait until close to departure — IRS transcripts can be requested but take time. If records are lost, the client defaults to 85/15 regardless of their actual contribution ratio.</div>
+    <div class="alert warn"><strong>Conversions while already a Portuguese resident are an unresolved tax question.</strong> Portugal may treat the conversion event itself as a taxable pension distribution — effectively taxing it twice. All conversions must be completed before establishing Portuguese tax residency. Do not convert post-move without specific Portuguese tax counsel guidance.</div>
+  </div>
+  <div id="roth-strategies" class="roth-panel">
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Pre-departure conversions: still beneficial, but for a different reason</div><span class="sc-status good">Still recommended</span></div><div class="sc-body">Conversions remain valuable even knowing Portugal taxes the growth component. Each dollar converted pre-departure becomes documented basis — exempt in Portugal. The math: pay US tax on conversion now, then only Portuguese tax on future growth (a smaller fraction). For clients in lower US brackets pre-departure, this almost always still favors converting. The key shift is that conversions reduce the taxable fraction of future distributions rather than creating fully tax-free income.</div></div>
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Form 8606 record-keeping — start immediately</div><span class="sc-status good">Action required now</span></div><div class="sc-body">For every client with a Roth who might move to Portugal: pull Form 8606 for every year contributions or conversions were made. Build a cumulative basis ledger. This is the documentation that establishes the tax-free portion in Portugal. If records are incomplete, the client defaults to the 85/15 rule — which may or may not be favorable depending on appreciation.</div></div>
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Model 85/15 vs. actual basis each year — it changes annually</div><span class="sc-status mid">Annual decision</span></div><div class="sc-body">As the Roth grows or as distributions reduce the balance, the better method shifts. Calculate both each year: actual contribution ratio vs. 85% fixed. Use whichever produces the lower taxable amount. Establish the method with Portuguese counsel in Year 1 and apply consistently — switching methods creates audit risk.</div></div>
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Sequence contributions drawn first in high-bracket years</div><span class="sc-status mid">Sequencing strategy</span></div><div class="sc-body">Drawing the contribution portion first (zero Portuguese tax) in years when other income pushes brackets high can smooth the overall tax burden. Coordinate with the bucket refill strategy — use Roth contributions to refill Bucket 1 in years when IRA distributions or capital gains have already pushed brackets up.</div></div>
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Position Roth as longevity reserve — not primary income</div><span class="sc-status good">Asset location shift</span></div><div class="sc-body">The Roth's advantages in Portugal are: no RMDs (flexibility), contributions fully exempt, and ability to grow tax-deferred for later years. Position it as Bucket 3 (longevity reserve) rather than primary income. Draw taxable accounts and traditional IRA distributions first to manage brackets, leaving the Roth for later years when basis represents a larger share of distributions or when other income has declined.</div></div>
+    <div class="strategy-card"><div class="sc-head"><div class="sc-title">Do NOT convert while a Portuguese tax resident</div><span class="sc-status bad">Hard rule</span></div><div class="sc-body">How Portugal treats a traditional-to-Roth conversion while already resident is unresolved. Portugal may tax the conversion as pension income at progressive rates — on top of US income tax on the same conversion. Until there is clear guidance from the Portuguese tax authority, conversions are a pre-departure-only strategy.</div></div>
+  </div>
+  <div id="roth-calculator" class="roth-panel">
+    <div class="alert info">Estimates Portuguese tax exposure on a Roth distribution. For client illustration — not a substitute for Portuguese tax filing guidance.</div>
+    <div class="calc-grid">
+      <div class="cf"><label>Total Roth balance ($)</label><input type="number" id="rb" value="450000"></div>
+      <div class="cf"><label>Documented contributions + conversions ($)</label><input type="number" id="rbasis" value="180000"></div>
+      <div class="cf"><label>Annual distribution ($)</label><input type="number" id="rdist" value="40000"></div>
+      <div class="cf"><label>Other Portuguese taxable income this year ($)</label><input type="number" id="rother" value="28000"></div>
+      <div class="cf"><label>USD/EUR rate</label><input type="number" id="rfx" value="1.09" step="0.01"></div>
+    </div>
+    <button class="calc-btn" onclick="calcRoth()">Calculate</button>
+    <div id="roth-results" style="display:none">
+      <div style="margin-top:1rem">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:.3rem">Distribution composition</div>
+        <div class="split-visual"><div class="split-exempt" id="split-e">exempt</div><div class="split-taxable" id="split-t">taxable</div></div>
+        <div style="display:flex;gap:1rem;font-size:11px;color:var(--text-muted);margin-bottom:1rem">
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--teal-light);border-radius:2px;display:inline-block"></span>Contributions — exempt in PT</span>
+          <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:var(--red);border-radius:2px;display:inline-block"></span>Growth — taxable in PT</span>
+        </div>
+      </div>
+      <div class="results-row">
+        <div class="res-card green"><div class="rl">Exempt portion</div><div class="rv" id="rr-exempt">—</div><div class="rs">Not subject to PT tax</div></div>
+        <div class="res-card red"><div class="rl">Taxable in Portugal</div><div class="rv" id="rr-taxable">—</div><div class="rs">Added to PT income</div></div>
+        <div class="res-card amber"><div class="rl">PT tax on Roth</div><div class="rv" id="rr-tax">—</div><div class="rs" id="rr-rate">Effective rate</div></div>
+        <div class="res-card"><div class="rl">85/15 taxable</div><div class="rv" id="rr-8515">—</div><div class="rs" id="rr-method">Compare methods</div></div>
+      </div>
+      <div id="rr-advice" class="alert info" style="margin-top:1rem"></div>
+    </div>
+  </div>
+</div>
+
+<!-- DISTRIBUTION MODULE -->
+<div id="panel-distribution" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Planning</div>
+    <h2>Income distribution mechanics</h2>
+    <p>How income actually flows from US accounts to Portugal — the banking infrastructure, currency conversion strategy, and compliance layer.</p>
+  </div>
+  <div class="section-title">The distribution pipeline</div>
+  <div class="pipe-flow">
+    <div class="pipe-box blue"><div class="pb-label">US Side</div><div class="pb-title">Income sources</div><div class="pb-body">SSA, brokerage distributions, IRA withdrawals, pension — all USD-denominated</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box amber"><div class="pb-label">Bridge layer</div><div class="pb-title">USD → EUR conversion</div><div class="pb-body">Expat-friendly US bank + specialist FX platform (Wise, OFX). The critical efficiency point — typical bank spread costs $1,200–$1,800/yr vs. ~$200 via Wise</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-box teal"><div class="pb-label">PT Side</div><div class="pb-title">Portuguese account</div><div class="pb-body">Operating account + 4–6 month EUR cash buffer. Pays local bills; buffer prevents forced conversion at bad FX timing</div></div>
+  </div>
+  <div class="section-title">US banking — choosing the right institution before departure</div>
+  <div class="alert warn"><strong>This decision must be made before departure.</strong> Most major US banks have poor foreign-resident policies or will restrict accounts after the address change. Establish the right US banking relationship 12–18 months before the move.</div>
+  <table class="rate-table">
+    <tr><th>Institution</th><th>Foreign-resident policy</th><th>Wire fees</th><th>ATM abroad</th><th>Verdict</th></tr>
+    <tr><td><strong>Charles Schwab Bank</strong></td><td class="lo">Expat-friendly — widely used</td><td class="mid">$0 outgoing domestic</td><td class="lo">Unlimited worldwide rebates</td><td class="lo">Best overall for expats</td></tr>
+    <tr><td><strong>Wise (multi-currency)</strong></td><td class="lo">Built for cross-border</td><td class="lo">~0.4–0.9% FX spread</td><td class="lo">Low-fee debit card</td><td class="lo">Best FX bridge platform</td></tr>
+    <tr><td><strong>HSBC Premier</strong></td><td class="lo">Designed for international clients</td><td class="lo">Reduced/free with Premier</td><td class="lo">Global network</td><td class="mid">High minimum balance</td></tr>
+    <tr><td>Fidelity (existing accounts)</td><td class="mid">Grandfathered OK; no new accts for foreign residents</td><td class="mid">Varies</td><td class="lo">ATM rebates available</td><td class="mid">Good if already a client</td></tr>
+    <tr><td style="color:var(--red)">Major US banks (BofA, Chase)</td><td class="hi">May restrict foreign residents</td><td class="hi">$25–45/wire</td><td class="hi">3% FX surcharge</td><td class="hi">Avoid as primary expat bank</td></tr>
+  </table>
+  <div class="section-title">Compliance layer</div>
+  <div class="ref-grid">
+    <div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">FBAR (FinCEN 114)</div><div class="rc-title">Annual US filing</div><div class="rc-body">Required if aggregate foreign accounts exceed $10,000 at any point during the year. Due April 15, auto-extended to Oct 15. Penalties: $10,000+ per violation.</div></div>
+    <div class="ref-card"><div class="rc-badge" style="color:var(--red)">FATCA Form 8938</div><div class="rc-title">Filed with US tax return</div><div class="rc-body">Threshold: $200k at year-end or $300k at any time (for those abroad). Reports foreign accounts AND assets. Separate from FBAR — both may apply.</div></div>
+    <div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Portuguese Modelo 3</div><div class="rc-title">Annual PT filing</div><div class="rc-body">Worldwide income must be declared. IRA distributions, US dividends, interest all reportable. Foreign taxes paid are creditable. Due June 30 each year.</div></div>
+    <div class="ref-card"><div class="rc-badge" style="color:var(--amber)">Transfer documentation</div><div class="rc-title">Keep paper trail</div><div class="rc-body">Portugal may query large incoming transfers. Maintain records of wire source, account, and income type for each transfer. Important if Portuguese tax authority questions whether funds are taxable in PT.</div></div>
+  </div>
+  <div class="alert warn"><strong>Lump-sum vs. regular distributions affect Portuguese bracket exposure.</strong> A single large IRA withdrawal in one year can spike into the 45–48% bracket. Spreading distributions across years — or pre-departure Roth conversions — can prevent bracket spikes significantly. Model distribution sizing carefully.</div>
+</div>
+
+<!-- BUCKET STRATEGY -->
+<div id="panel-buckets" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Planning</div>
+    <h2>Cross-border bucket strategy</h2>
+    <p>The traditional bucket framework rebuilt for Portugal — replacing annuities with US-compliant instruments.</p>
+  </div>
+  <div class="alert danger"><strong>Traditional annuities do not work in this context.</strong> US variable annuities held by a Portuguese tax resident create PFIC exposure and unclear Portuguese tax treatment. Portuguese insurance products are inaccessible to US citizens under FATCA. The bucket framework must be rebuilt with compliant instruments only.</div>
+  <div class="section-title">The adapted framework</div>
+  <div class="bucket-grid">
+    <div class="bucket bucket-1">
+      <div class="bucket-head"><div class="bh-num">Bucket 1</div><div class="bh-name">Liquidity & living</div><div class="bh-horizon">Years 1–3 of expenses</div></div>
+      <div class="bucket-body">
+        <div class="bb-purpose">Replaces the annuity. Covers near-term spending without forcing investment liquidation at wrong time or FX rate.</div>
+        <div class="bi">EUR cash in Portuguese bank (4–6 months)</div>
+        <div class="bi">USD cash in US Schwab account (6–12 months)</div>
+        <div class="bi">US Treasury bills / short-term T-notes</div>
+        <div class="bi">US money market funds (US-domiciled only)</div>
+        <div class="bi">Social Security direct deposit — auto-refills monthly</div>
+        <div class="bi">Pension payments — auto-refills monthly</div>
+      </div>
+    </div>
+    <div class="bucket bucket-2">
+      <div class="bucket-head"><div class="bh-num">Bucket 2</div><div class="bh-name">Income generation</div><div class="bh-horizon">Years 4–12</div></div>
+      <div class="bucket-body">
+        <div class="bb-purpose">Generates income to refill Bucket 1. Manages currency exposure. All instruments US-domiciled.</div>
+        <div class="bi">US-domiciled bond ETFs (AGG, BND, SCHZ)</div>
+        <div class="bi">US-domiciled dividend ETFs (VYM, SCHD)</div>
+        <div class="bi">I-Bonds / TIPS (inflation protection)</div>
+        <div class="bi">Traditional IRA — sized to avoid PT bracket spikes</div>
+        <div class="bi">Roth IRA contributions tranche — zero PT tax</div>
+        <div class="bi">EUR-hedged US bond allocation (optional)</div>
+      </div>
+    </div>
+    <div class="bucket bucket-3">
+      <div class="bucket-head"><div class="bh-num">Bucket 3</div><div class="bh-name">Long-term growth</div><div class="bh-horizon">Years 13+</div></div>
+      <div class="bucket-body">
+        <div class="bb-purpose">Growth engine. All assets remain US-domiciled. Refills Buckets 1 and 2 over time.</div>
+        <div class="bi">US total market ETFs (VTI, SCHB — US-domiciled)</div>
+        <div class="bi">US-domiciled international ETFs (VXUS, IXUS)</div>
+        <div class="bi">Roth IRA — long-term growth, no RMDs</div>
+        <div class="bi">Portuguese real estate owned outright (EUR hedge)</div>
+        <div class="bi" style="color:var(--red)">No UCITS/EU funds — PFIC rule applies</div>
+      </div>
+    </div>
+  </div>
+  <div class="section-title">Annuity replacement rationale</div>
+  <table class="rate-table">
+    <tr><th>Traditional role</th><th>Why annuities fail here</th><th>Portugal-adapted replacement</th></tr>
+    <tr><td>Guaranteed income stream</td><td class="hi">PFIC exposure; PT tax treatment unclear; illiquid</td><td class="lo">Social Security + pension (treaty-protected, guaranteed)</td></tr>
+    <tr><td>Short-term capital preservation</td><td class="hi">Surrender charges; PT tax event on access</td><td class="lo">US T-bills, money market, EUR cash buffer</td></tr>
+    <tr><td>Inflation hedge</td><td class="hi">Fixed annuity erodes with EUR inflation over 20+ years</td><td class="lo">TIPS + owned property + equity bucket refill</td></tr>
+    <tr><td>Longevity protection</td><td class="hi">SPIA creates permanent PT tax obligation per payment</td><td class="lo">Delayed SS to age 70 + Roth IRA longevity reserve</td></tr>
+  </table>
+  <div class="alert green"><strong>Owned property as the most durable EUR hedge.</strong> Paying off Portuguese property outright removes the largest recurring EUR liability from the budget permanently. It eliminates rent inflation risk and FX exposure on housing — the closest functional analog to annuity income certainty, but on the expense side of the ledger rather than the income side.</div>
+</div>
+
+<!-- CHECKLIST -->
+<div id="panel-checklist" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Tools</div>
+    <h2>Client pre-move checklist</h2>
+    <p>Track preparation progress. Check items off as they are completed or confirmed with the client.</p>
+  </div>
+  <div class="checklist-header">
+    <div style="font-size:13px;font-weight:500;color:var(--text-mid)" id="cl-count">0 of 19 complete</div>
+    <div style="font-size:12px;color:var(--text-muted)" id="cl-pct">0%</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="cl-bar" style="width:0%"></div></div>
+  <ul class="cl-list" id="cl-list"></ul>
+</div>
+
+<!-- SCENARIOS -->
+<div id="panel-scenarios" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Tools</div>
+    <h2>Client scenarios</h2>
+    <p>Pre-built profiles showing key tax, income, and planning considerations by client type.</p>
+  </div>
+  <div class="scenario-select">
+    <label>Client profile:</label>
+    <select onchange="loadScenario(this.value)">
+      <option value="m62">Married couple, 62 — Social Security + 401k</option>
+      <option value="s55">Single, 55 — early retirement, large brokerage</option>
+      <option value="dual">Dual US-EU citizen, 65 — pension + investments</option>
+      <option value="biz">Business owner, 58 — selling company</option>
+    </select>
+  </div>
+  <div id="scenario-out"></div>
+</div>
+
+<!-- TIMELINE -->
+<div id="panel-timeline" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Tools</div>
+    <h2>Pre-departure timeline</h2>
+    <p>Works backwards from intended move date. Time-sensitive items — especially Roth conversions and brokerage decisions — have hard deadlines that close at departure.</p>
+  </div>
+  <div class="tl-select">
+    <label>Months until move:</label>
+    <select onchange="buildTimeline(parseInt(this.value))" id="tl-select">
+      <option value="12">12 months</option>
+      <option value="18" selected>18 months</option>
+      <option value="24">24 months</option>
+      <option value="36">36 months</option>
+    </select>
+  </div>
+  <div class="tl-wrap" id="tl-wrap"></div>
+</div>
+
+<!-- ASK THE ADVISOR -->
+<div id="panel-ask" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Tools</div>
+    <h2>Ask the advisor</h2>
+    <p>AI-powered Q&amp;A on Portugal retirement planning. Always confirm with a licensed Portuguese professional before client action.</p>
+  </div>
+  <div class="ask-wrap">
+    <div class="section-title">Common questions</div>
+    <div class="chips">
+      <div class="chip" onclick="askQ('Now that NHR is closed and IFICI doesn\'t apply to retirees, what is the actual tax situation for a US retiree in Portugal?')">Tax reality post-NHR</div>
+      <div class="chip" onclick="askQ('How exactly are Roth IRA distributions taxed in Portugal? Is any portion tax-free?')">Roth IRA treatment</div>
+      <div class="chip" onclick="askQ('Can my client keep their US brokerage accounts after moving to Portugal?')">US brokerage accounts</div>
+      <div class="chip" onclick="askQ('How is US Social Security taxed in Portugal under the tax treaty?')">Social Security & treaty</div>
+      <div class="chip" onclick="askQ('What are the main FBAR and FATCA obligations for Americans in Portugal?')">FBAR & FATCA</div>
+      <div class="chip" onclick="askQ('What pre-departure tax strategies make the most sense now that NHR is closed to retirees?')">Pre-departure strategies</div>
+      <div class="chip" onclick="askQ('What is the D7 visa income requirement and what income sources qualify?')">D7 visa income</div>
+      <div class="chip" onclick="askQ('What happens to Medicare when a client moves to Portugal?')">Medicare abroad</div>
+      <div class="chip" onclick="askQ('How does Portuguese inheritance law affect US assets and wills?')">Inheritance law</div>
+      <div class="chip" onclick="askQ('What is the best US bank to keep as an expat living in Portugal?')">Best expat bank</div>
+    </div>
+    <div class="ask-row">
+      <input type="text" id="ask-input" placeholder="Ask any question about retiring in Portugal...">
+      <button onclick="askQuestion()">Ask →</button>
+    </div>
+    <div class="answer-box" id="answer-box"></div>
+  </div>
+</div>
+
+<!-- HANDOFF -->
+<div id="panel-handoff" class="panel">
+  <div class="page-header">
+    <div class="breadcrumb">Handoff</div>
+    <h2>Specialist referral guide</h2>
+    <p>This resource prepares advisors up to the handoff point. These are the specialists every Portugal-retiring client will need — and when to engage each.</p>
+  </div>
+  <div class="specialist-list">
+    <div class="specialist-card"><div class="sp-avatar blue">⚖️</div><div><div class="sp-name">Portuguese tax attorney / Contabilista Certificado</div><div class="sp-desc">Files Modelo 3 returns, advises on treaty application and Roth IRA reporting method (contribution/growth split), handles double-taxation analysis, liaises with Autoridade Tributária. Critical role post-NHR closure.</div><span class="sp-when">Engage before first Portuguese tax year</span></div></div>
+    <div class="specialist-card"><div class="sp-avatar teal">🏛️</div><div><div class="sp-name">Portuguese immigration lawyer (Advogado)</div><div class="sp-desc">Handles D7 visa applications, AIMA appointments and follow-up, residency permit renewals, and citizenship pathway planning. AIMA processing times are lengthy — early engagement critical.</div><span class="sp-when">Engage 6–12 months before intended move</span></div></div>
+    <div class="specialist-card"><div class="sp-avatar amber">🏠</div><div><div class="sp-name">Portuguese real estate lawyer (Solicitador)</div><div class="sp-desc">Reviews CPCV (Promissory Purchase Contract), conducts title due diligence, handles escritura, confirms no liens or encumbrances. Never use seller's agent's recommended solicitor.</div><span class="sp-when">Engage before signing any property contract</span></div></div>
+    <div class="specialist-card"><div class="sp-avatar coral">💼</div><div><div class="sp-name">US expat CPA / international tax attorney</div><div class="sp-desc">Manages US filing obligations (FBAR, Form 8938, Form 8606, Form 1040), PFIC analysis, Foreign Tax Credit optimization, pre-departure Roth conversion strategy, and state tax domicile exit planning.</div><span class="sp-when">Engage 1–2 years before move for pre-departure planning</span></div></div>
+    <div class="specialist-card"><div class="sp-avatar blue">🏦</div><div><div class="sp-name">Fee-only international financial planner</div><div class="sp-desc">Cross-border asset allocation, currency risk management, US brokerage account resolution, combined US+PT effective tax rate modeling, and bucket strategy implementation coordination.</div><span class="sp-when">Engage 12–18 months before move</span></div></div>
+    <div class="specialist-card"><div class="sp-avatar teal">🏥</div><div><div class="sp-name">International health insurance broker</div><div class="sp-desc">Sources expat health plans meeting D7 visa requirements, coordinates SNS enrollment, advises on Medicare Part B suspension vs. retention decision and re-enrollment penalty implications.</div><span class="sp-when">Engage 3–6 months before move</span></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+<script>
+// ── navigation ──────────────────────────────────────────────────────────────
+function nav(id, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n=>{
+      if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+    });
+  }
+  window.scrollTo(0,0);
+}
+
+// ── knowledge base ────────────────────────────────────────────────────────────
+const topics = {
+visa:`<div class="kc-title">Visa &amp; residency</div>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">D7 Passive Income Visa</div><div class="rc-title">Primary route for retirees</div><div class="rc-body">Requires proof of stable passive income (~€820/month minimum for primary applicant, 2024). Social Security, pension, dividends, rental income all qualify. Valid 2 years, renewable. Requires health insurance proof.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">Golden Visa</div><div class="rc-title">Investment-based residency</div><div class="rc-body">Significantly reformed 2023 — property purchase no longer qualifies in most areas. Focus now on approved fund investment (€500k+) or job creation. Path to citizenship in 5 years without full-time residency requirement.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">NIF Number</div><div class="rc-title">Essential first step</div><div class="rc-body">Portuguese tax identification number required for: opening a bank account, signing a lease, buying property, filing taxes. Can be obtained via Portuguese consulate in the US or through a fiscal representative in Portugal.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--coral)">AIMA Registration</div><div class="rc-title">New immigration agency</div><div class="rc-body">SEF (Foreigners &amp; Borders Service) was replaced by AIMA in late 2023. All residency permit applications, renewals, and appointments now through AIMA. Processing times have been lengthy — start 6–12 months before intended move.</div></div>
+</div>
+<div class="alert warn">AIMA processing times have been lengthy since the 2023 transition. A Portuguese immigration lawyer can significantly accelerate the process. The D7 income minimum increases with dependents: +50% per adult dependent, +30% per child.</div>`,
+
+tax:`<div class="kc-title">Tax planning (post-NHR)</div>
+<div class="alert danger"><strong>NHR is closed. IFICI does not apply to retirees.</strong> The NHR program ended January 2024 with the transitional period closing March 2025. IFICI requires active employment in qualifying sectors (science, tech, R&D). Standard Portuguese progressive rates now apply to passive-income retirees.</div>
+<p><strong>Portuguese standard income tax rates (2025):</strong></p>
+<table class="rate-table">
+<tr><th>Taxable income (EUR)</th><th>Rate</th><th>Typical retiree?</th></tr>
+<tr><td>Up to €7,703</td><td class="lo">13.25%</td><td>Low-income only</td></tr>
+<tr><td>€7,703 – €16,472</td><td class="mid">18–23%</td><td></td></tr>
+<tr><td>€16,472 – €27,146</td><td class="mid">26–32.75%</td><td>✓ Typical range</td></tr>
+<tr><td>€27,146 – €51,997</td><td class="mid">37–43.5%</td><td>✓ Typical range</td></tr>
+<tr><td>€51,997 – €81,199</td><td class="hi">45%</td><td>Higher-income</td></tr>
+<tr><td>Above €81,199</td><td class="hi">48%</td><td>Higher-income</td></tr>
+</table>
+<p style="font-size:12px;color:var(--text-muted);margin-bottom:1rem">Dividends, capital gains, and interest: flat 28% (taxpayer may elect progressive if lower).</p>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">US–Portugal Tax Treaty</div><div class="rc-title">Now the primary planning tool</div><div class="rc-body">Without NHR, the treaty is the main shield. Social Security taxed only in US. Private pensions generally taxable in country of residence. Analysis required for every income stream.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Pre-departure Roth conversions</div><div class="rc-title">Single biggest lever</div><div class="rc-body">Converting traditional IRA/401k to Roth before departure — while paying US tax — turns future distributions into documented basis (exempt in Portugal). This window closes permanently at departure.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">Foreign Tax Credit</div><div class="rc-title">US-side mitigation</div><div class="rc-body">US citizens remain taxable worldwide regardless of residence. Portuguese taxes paid on qualifying income can be credited against US liability via Form 1116. Credit ordering matters significantly.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--coral)">FBAR &amp; FATCA</div><div class="rc-title">Mandatory US disclosures</div><div class="rc-body">FBAR (FinCEN 114): aggregate foreign accounts &gt;$10,000 at any point. FATCA Form 8938: $200k year-end/$300k at any time for those abroad. Penalties for non-compliance are severe.</div></div>
+</div>
+<ul><li>State tax exit planning: CA, NY, and similar states must be formally exited — update voter registration, driver's license, bank statements. Document the move date.</li><li>PFIC warning: never purchase non-US-domiciled investment funds (EU UCITS, Portuguese mutual funds) after establishing PT residency.</li><li>RMD planning: mandatory distributions continue at age 73 — now subject to Portuguese progressive rates without NHR shielding. Model this now.</li></ul>`,
+
+retirement:`<div class="kc-title">Retirement income — post-NHR treatment</div>
+<div class="alert warn">Without NHR, each income source is subject to standard Portuguese rates unless shielded by the US–Portugal tax treaty. Treaty analysis is required for every income stream individually.</div>
+<table class="rate-table">
+<tr><th>Income source</th><th>Portuguese treatment</th></tr>
+<tr><td><strong>US Social Security</strong></td><td class="lo">Treaty Article 17: taxable ONLY in US — zero PT tax</td></tr>
+<tr><td>Traditional IRA / 401k distributions</td><td class="hi">Taxable in Portugal at progressive rates — treaty analysis required</td></tr>
+<tr><td>Roth IRA distributions</td><td class="mid">Contributions exempt; growth taxable at progressive rates (see Roth module)</td></tr>
+<tr><td>Employer / government pension</td><td class="hi">Generally taxable in country of residence under treaty</td></tr>
+<tr><td>Capital gains (US stocks)</td><td class="mid">Flat 28% in Portugal (or progressive if elected) — plus US tax</td></tr>
+<tr><td>Dividends</td><td class="mid">Flat 28% in Portugal — FTC may offset US liability</td></tr>
+<tr><td>Rental income (US property)</td><td class="hi">Reportable in both countries; FTC credit mechanism applies</td></tr>
+</table>
+<div class="alert info"><strong>Social Security treaty protection remains intact post-NHR.</strong> For clients where SS forms a large share of income, the combined tax picture may be more manageable than it first appears. Model it explicitly — SS is effectively off the Portuguese tax base entirely. The 28% flat rate on investment income is also often competitive vs. US state+federal rates for higher-income clients.</div>`,
+
+banking:`<div class="kc-title">Banking &amp; currency management</div>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Portuguese Bank Account</div><div class="rc-title">Required for D7 visa</div><div class="rc-body">Most banks (Millennium BCP, Caixa Geral, Santander Portugal, Novo Banco) allow non-resident accounts. Requires NIF, passport, proof of address. Some banks accept applications via consulate remotely.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">FX platform (Wise / OFX)</div><div class="rc-title">Use instead of bank wires</div><div class="rc-body">Traditional banks charge 2–4% FX spread. Wise charges ~0.4–0.9% at mid-market rate. On $4,000/month in transfers: difference = $1,200–$1,800/year. Establish Wise account before departure.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">EUR cash buffer</div><div class="rc-title">Maintain 4–6 months always</div><div class="rc-body">Maintaining 4–6 months of EUR living expenses in the Portuguese account prevents forced conversions when USD/EUR rates are unfavorable. Convert in tranches monthly rather than all at once.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--red)">US brokerage restrictions</div><div class="rc-title">Critical — resolve before move</div><div class="rc-body">Fidelity, Vanguard, Schwab may restrict or freeze accounts for foreign residents under FATCA. Contact broker 12–18 months before departure. Some offer international account options. IBKR is expat-friendly.</div></div>
+</div>
+<div class="alert warn"><strong>US brokerage account restrictions are the most commonly overlooked pre-departure issue.</strong> Vanguard in particular has restricted foreign-resident accounts. Clients should contact their broker immediately — this cannot be fixed easily from Portugal after the fact.</div>`,
+
+healthcare:`<div class="kc-title">Healthcare</div>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Portuguese SNS (public)</div><div class="rc-title">Accessible after residency</div><div class="rc-body">Residents register with the Serviço Nacional de Saúde after legal residency established. Quality varies by region; Lisbon and Porto have strong facilities. Specialist wait times can be long. Cost is very low.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">Private international insurance</div><div class="rc-title">Required for D7 visa</div><div class="rc-body">Private expat health insurance: ~€150–400/month for a 60-year-old depending on coverage level. Required proof for D7 visa application. Options: Cigna Global, AXA, Allianz Care, BUPA Global.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">Medicare Part B decision</div><div class="rc-title">10% annual re-enrollment penalty</div><div class="rc-body">If client drops Part B to save premiums while abroad, there is a 10% penalty for each 12-month period without coverage upon returning to the US. Most advisors recommend maintaining Part B if any realistic chance of return exists.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--red)">Medicare does not cover Portugal</div><div class="rc-title">Zero coverage abroad</div><div class="rc-body">Medicare Part A &amp; B do not cover care outside the US (with very limited exceptions). Private international coverage must be secured before departure — not after arrival.</div></div>
+</div>`,
+
+property:`<div class="kc-title">Property</div>
+<p><strong>Buying process overview:</strong> NIF required → CPCV (Promissory Contract, 10–30% deposit) → due diligence (title search, no liens) → Escritura (deed at notary, IMT + stamp duty paid) → registration.</p>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">IMT (Transfer tax)</div><div class="rc-body">0–8% depending on property value and whether it's a primary residence. Calculated on declared value or fiscal value, whichever is higher.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">IMI (Annual property tax)</div><div class="rc-body">0.3–0.8% of fiscal value annually. Urban properties typically 0.3–0.45%. Generally much lower than US property taxes.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">Stamp duty</div><div class="rc-body">0.8% on property purchases; 0.6% on mortgages. Paid at Escritura.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--coral)">Legal fees</div><div class="rc-body">Typically 1–2% of purchase price. Always use an independent Portuguese property lawyer — not one recommended by the seller's agent.</div></div>
+</div>
+<div class="alert warn">Renting first is strongly advisable. Many expats regret buying before fully understanding the region and lifestyle. A 6–12 month rental allows proper due diligence and avoids costly mistakes. Property values in popular expat areas (Lisbon, Algarve) have risen significantly.</div>`,
+
+estate:`<div class="kc-title">Estate &amp; inheritance planning</div>
+<div class="alert warn"><strong>Portugal applies EU Succession Regulation (Brussels IV).</strong> Unless a client explicitly elects the law of their nationality (US state law) in their will, Portuguese law may govern Portuguese-situated assets. US wills are not automatically recognized — a Portuguese will or Brussels IV election is strongly recommended.</div>
+<div class="ref-grid">
+<div class="ref-card"><div class="rc-badge" style="color:var(--navy-light)">Portuguese inheritance tax</div><div class="rc-title">Favorable — abolished for direct family</div><div class="rc-body">Portugal abolished inheritance tax between spouses, children, and parents. A 10% stamp duty applies to assets passed to non-direct heirs. Significantly more favorable than most EU countries.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--amber)">Forced heirship (Legítima)</div><div class="rc-title">Minimum share for direct heirs</div><div class="rc-body">Portuguese law reserves a minimum share (typically 50%) for direct heirs. Client cannot freely disinherit spouse or children for Portuguese-situated assets unless a Brussels IV election is made.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--red)">US estate tax exposure</div><div class="rc-title">No US–Portugal estate tax treaty</div><div class="rc-body">US citizens remain subject to US estate tax on worldwide assets regardless of residence. 2024 exemption ~$13.6M per person. No estate tax treaty between US and Portugal exists.</div></div>
+<div class="ref-card"><div class="rc-badge" style="color:var(--teal)">Portuguese Power of Attorney</div><div class="rc-title">Procuração — get before move</div><div class="rc-body">Essential for managing affairs remotely and for property transactions. Execute and apostille while still in the US — much easier than obtaining from abroad. Required for many legal and financial actions.</div></div>
+</div>`,
+
+social:`<div class="kc-title">Social Security</div>
+<div class="alert green"><strong>Social Security treaty protection remains fully intact post-NHR.</strong> Under the US–Portugal tax treaty, US Social Security benefits are taxable ONLY in the United States — not subject to Portuguese tax. This is one of the most significant planning advantages remaining for retirees in Portugal.</div>
+<ul style="margin-bottom:1rem">
+<li>US Social Security benefits can be received while living in Portugal — no residency restriction applies</li>
+<li>Direct deposit to a Portuguese bank account is available via SSA's international direct deposit program</li>
+<li>Clients must notify SSA of foreign address change; benefits are not automatically suspended for foreign residence</li>
+<li>The US–Portugal Totalization Agreement prevents double Social Security contributions and can help workers who split careers between both countries qualify for benefits</li>
+<li>SSA has a Federal Benefits Unit at the US Embassy in Lisbon to assist US citizens with Social Security matters in Portugal</li>
+</ul>
+<div class="alert info">For clients where SS forms a large share of retirement income, this treaty protection means the Portuguese tax burden may be significantly lower than progressive rate tables suggest. Always model SS exclusion first when assessing Portuguese tax exposure.</div>`
+};
+
+function setTopic(key) {
+  document.querySelectorAll('[data-topic]').forEach(b=>b.classList.remove('active'));
+  const btn = document.querySelector(`[data-topic="${key}"]`);
+  if(btn) btn.classList.add('active');
+  const content = document.getElementById('kb-content');
+  if(content && topics[key]) content.innerHTML = topics[key];
+  // Ensure knowledge panel is active
+  const kp = document.getElementById('panel-knowledge');
+  if(kp && !kp.classList.contains('active')) nav('knowledge',null);
+}
+setTopic('visa');
+
+// ── roth calculator ──────────────────────────────────────────────────────────
+function showRoth(id,el){
+  document.querySelectorAll('.roth-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.roth-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('roth-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+}
+function ptTax(eur){
+  if(eur<=0)return 0;
+  const b=[[7703,.1325],[11623,.18],[16472,.23],[21321,.26],[27146,.3275],[39791,.37],[51997,.435],[81199,.45],[1e9,.48]];
+  let tax=0,prev=0;
+  for(const[top,rate]of b){if(eur<=top){tax+=(eur-prev)*rate;break;}tax+=(top-prev)*rate;prev=top;}
+  return tax;
+}
+function fmt(n){return'$'+Math.round(n).toLocaleString();}
+function calcRoth(){
+  const bal=+document.getElementById('rb').value||0;
+  const basis=+document.getElementById('rbasis').value||0;
+  const dist=+document.getElementById('rdist').value||0;
+  const other=+document.getElementById('rother').value||0;
+  const fx=+document.getElementById('rfx').value||1.09;
+  if(!bal||!dist)return;
+  const bRatio=Math.min(basis/bal,1);
+  const taxActual=dist*(1-bRatio);
+  const tax8515=dist*0.15;
+  const useActual=taxActual<=tax8515;
+  const taxable=useActual?taxActual:tax8515;
+  const exempt=dist-taxable;
+  const totalEUR=(other+taxable)/fx;
+  const otherEUR=other/fx;
+  const ptTaxRothUSD=(ptTax(totalEUR)-ptTax(otherEUR))*fx;
+  const effRate=taxable>0?ptTaxRothUSD/taxable:0;
+  const ep=Math.round((exempt/dist)*100);
+  const tp=100-ep;
+  document.getElementById('split-e').style.width=ep+'%';
+  document.getElementById('split-e').textContent=ep>20?ep+'% exempt':'';
+  document.getElementById('split-t').style.width=tp+'%';
+  document.getElementById('split-t').textContent=tp>20?tp+'% taxable':'';
+  document.getElementById('rr-exempt').textContent=fmt(exempt);
+  document.getElementById('rr-taxable').textContent=fmt(taxable);
+  document.getElementById('rr-tax').textContent=fmt(ptTaxRothUSD);
+  document.getElementById('rr-rate').textContent='Effective rate: '+(effRate*100).toFixed(1)+'%';
+  document.getElementById('rr-8515').textContent=fmt(tax8515);
+  document.getElementById('rr-method').textContent=useActual?'Actual basis wins ('+Math.round(bRatio*100)+'% contributions)':'85/15 rule wins (low documented basis)';
+  const adv=document.getElementById('rr-advice');
+  adv.innerHTML=`<strong>Method: ${useActual?'Actual basis tracking':'85/15 fallback rule'}</strong> — ${useActual?`Contributions are ${Math.round(bRatio*100)}% of the balance. Actual basis gives lower taxable amount than 85/15. Maintain Form 8606 records carefully.`:`Contributions are only ${Math.round(bRatio*100)}% of balance — account has grown significantly. 85/15 fallback (${fmt(tax8515)} taxable) is more favorable than tracking actual basis (${fmt(taxActual)} taxable).`} Portuguese tax on this distribution: <strong>${fmt(ptTaxRothUSD)}</strong>. Portuguese tax paid may be claimable as Foreign Tax Credit on Form 1116 (passive income basket) — consult US expat CPA.`;
+  document.getElementById('roth-results').style.display='block';
+}
+
+// ── checklist ────────────────────────────────────────────────────────────────
+const clItems=[
+  {l:"Obtain NIF (Portuguese tax number)",m:"Via consulate in the US or fiscal representative in Portugal",t:"visa"},
+  {l:"Open Portuguese bank account",m:"Requires NIF + passport — some banks allow non-resident accounts remotely",t:"banking"},
+  {l:"Confirm D7 visa income qualification",m:"Document all passive income sources with 6 months of statements",t:"visa"},
+  {l:"Engage Portuguese immigration lawyer",m:"AIMA wait times are long — start 6–12 months before intended move",t:"visa"},
+  {l:"Address US brokerage account foreign-resident policy",m:"Contact Fidelity/Vanguard/Schwab immediately — account freezes are common post-move",t:"banking"},
+  {l:"Pull Form 8606 records for all Roth contribution and conversion years",m:"Foundational document for Portuguese Roth tax treatment — build cumulative basis ledger now",t:"urgent"},
+  {l:"Model and execute Roth conversion strategy",m:"Biggest pre-departure tax lever — window closes permanently at PT residency establishment",t:"urgent"},
+  {l:"Determine 85/15 vs. actual basis method for Roth distributions",m:"Establish method with Portuguese counsel in Year 1 — apply consistently each year",t:"tax"},
+  {l:"Model combined US + Portuguese tax rates on each income stream",m:"SS is treaty-protected; IRA/pension distributions now face PT progressive rates",t:"tax"},
+  {l:"File FBAR for any existing foreign accounts",m:"Required if aggregate balance exceeds $10,000 at any point during the year",t:"tax"},
+  {l:"Confirm IFICI / NHR 2.0 does not apply to client",m:"Only for qualifying professionals in science/tech/R&D — not passive-income retirees",t:"tax"},
+  {l:"Retain US expat CPA",m:"Pre-departure planning + ongoing FBAR, Form 8938, Form 8606, Form 1040 compliance",t:"tax"},
+  {l:"Resolve state tax domicile exit",m:"CA, NY, and similar states require formal break — voter reg, DL, bank statements",t:"tax"},
+  {l:"Arrange international health insurance",m:"Required for D7 visa; Medicare does not cover Portugal",t:"urgent"},
+  {l:"Evaluate Medicare Part B retention decision",m:"10% annual penalty per year of non-enrollment if client later returns to US",t:"urgent"},
+  {l:"Update will and estate documents for Portuguese domicile",m:"Consider Brussels IV election to apply US law to Portuguese-situated assets",t:"tax"},
+  {l:"Execute Portuguese Power of Attorney (Procuração)",m:"Apostille while still in the US — much easier than obtaining from abroad",t:"visa"},
+  {l:"Evaluate property: rent first vs. buy",m:"Most advisors recommend 6–12 months renting before committing to purchase",t:"banking"},
+  {l:"Prepare client briefing document for Portuguese specialists",m:"Cover: income sources, account types, real estate, estate goals, Roth basis records, target regions",t:"urgent"},
+];
+const tagL={urgent:"Priority",tax:"Tax",visa:"Visa",banking:"Banking"};
+let checked=new Set();
+function renderCL(){
+  const ul=document.getElementById('cl-list');
+  ul.innerHTML='';
+  clItems.forEach((item,i)=>{
+    const li=document.createElement('li');
+    li.className='cl-item';
+    const box=document.createElement('div');
+    box.className='cl-box'+(checked.has(i)?' done':'');
+    box.onclick=()=>{checked.has(i)?checked.delete(i):checked.add(i);renderCL();};
+    const txt=document.createElement('div');
+    const tag=item.t?`<span class="tag ${item.t}">${tagL[item.t]}</span>`:'';
+    txt.innerHTML=`<div class="cl-label${checked.has(i)?' done':''}">${item.l}${tag}</div><div class="cl-meta">${item.m}</div>`;
+    li.append(box,txt);ul.appendChild(li);
+  });
+  const pct=Math.round(checked.size/clItems.length*100);
+  document.getElementById('cl-bar').style.width=pct+'%';
+  document.getElementById('cl-count').textContent=`${checked.size} of ${clItems.length} complete`;
+  document.getElementById('cl-pct').textContent=pct+'%';
+}
+renderCL();
+
+// ── scenarios ────────────────────────────────────────────────────────────────
+const scenarios={
+m62:{title:"Married couple, age 62 — Social Security + 401k",overview:"Common profile. SS is treaty-protected (zero PT tax). 401k distributions face PT progressive rates — pre-departure Roth conversions are the critical action.",cards:[
+  {h:"Income picture",rows:[{k:"Combined SS",v:"~$30k/yr — treaty protected",c:"green"},{k:"401k distributions",v:"$40–60k — PT progressive rates",c:"red"},{k:"D7 visa qualification",v:"Likely met",c:"green"},{k:"NHR/IFICI benefit",v:"Not available",c:"red"}]},
+  {h:"Key tax issues",rows:[{k:"SS PT treatment",v:"Zero PT tax (treaty)",c:"green"},{k:"401k in PT",v:"Progressive 32–43%+",c:"red"},{k:"Roth conversions",v:"Urgent before departure",c:"amber"},{k:"State exit (CA/NY)",v:"Action required if applicable",c:"amber"}]},
+  {h:"Critical actions",rows:[{k:"Roth conversion ladder",v:"Start 1–3 yrs before move"},{k:"Roth basis records (8606)",v:"Pull immediately"},{k:"Brokerage account policy",v:"Check immediately"},{k:"Healthcare bridge to 65",v:"3 yrs private coverage"}]},
+  {h:"Timeline",rows:[{k:"Start Roth conversions",v:"Now"},{k:"Start visa process",v:"12 months out"},{k:"NIF + bank account",v:"6 months out"},{k:"Health insurance",v:"Before departure"}]}
+]},
+s55:{title:"Single, age 55 — early retirement, large brokerage",overview:"No SS yet. Without NHR, dividends and capital gains face the 28% flat rate. PFIC risk on any non-US funds is critical. 10-year healthcare gap before Medicare.",cards:[
+  {h:"Income picture",rows:[{k:"SS eligibility",v:"Age 62 earliest"},{k:"Portfolio withdrawals",v:"Primary income source"},{k:"Dividends/cap gains in PT",v:"28% flat — may be competitive",c:"amber"},{k:"NHR/IFICI benefit",v:"Not available",c:"red"}]},
+  {h:"Key tax issues",rows:[{k:"28% flat on investments",v:"May beat US+state rates",c:"amber"},{k:"PFIC risk (non-US funds)",v:"Avoid entirely — severe penalty",c:"red"},{k:"Brokerage restrictions",v:"High risk — address early",c:"red"},{k:"Medicare gap (55–65)",v:"10 years private coverage",c:"red"}]},
+  {h:"Critical actions",rows:[{k:"Roth conversions pre-move",v:"Reduce future IRA exposure"},{k:"Form 8606 records",v:"Pull immediately"},{k:"Model PT 28% vs US rates",v:"May be favorable"},{k:"Currency strategy",v:"Monthly USD/EUR cost-average"}]},
+  {h:"Timeline",rows:[{k:"Pre-departure tax planning",v:"2 years out"},{k:"Brokerage decisions",v:"18 months out"},{k:"SS claiming strategy",v:"Model age 62–70 now"},{k:"Expat health plan",v:"Before departure"}]}
+]},
+dual:{title:"Dual US-EU citizen, age 65 — pension + investments",overview:"EU citizenship removes visa complexity. However, dual-country pension income creates complex treaty interactions. No NHR/IFICI benefit as passive-income retiree.",cards:[
+  {h:"Income picture",rows:[{k:"Residency pathway",v:"EU citizen — no D7 needed",c:"green"},{k:"US SS + EU pension",v:"Dual-country — complex",c:"amber"},{k:"Medicare Part B",v:"Age 65 — decision required",c:"amber"},{k:"NHR/IFICI",v:"Not available",c:"red"}]},
+  {h:"Key tax issues",rows:[{k:"EU pension in PT",v:"Taxable at PT progressive rates",c:"red"},{k:"US SS",v:"Treaty: US-only tax",c:"green"},{k:"Dual treaty interaction",v:"Complex — specialist essential",c:"red"},{k:"US estate tax on EU assets",v:"No EU estate treaty",c:"red"}]},
+  {h:"Critical actions",rows:[{k:"Register as EU resident",v:"Simpler than D7 process"},{k:"Coordinate 2 pension systems",v:"SS + totalization analysis"},{k:"Dual will / Brussels IV",v:"Election review needed"},{k:"Model both pension tax rates",v:"Before committing to move"}]},
+  {h:"Timeline",rows:[{k:"Residency registration",v:"On arrival (EU citizen)"},{k:"Medicare Part B decision",v:"Before departure"},{k:"Estate plan update",v:"6–12 months out"},{k:"PT tax counsel",v:"Early — dual pension = complexity"}]}
+]},
+biz:{title:"Business owner, age 58 — selling company",overview:"Highest complexity. The timing of Portuguese tax residency relative to the sale close date is the single most critical variable. Must be resolved before any move actions.",cards:[
+  {h:"Income picture",rows:[{k:"Company sale proceeds",v:"Large capital event",c:"amber"},{k:"Post-sale income",v:"Investment portfolio",c:"green"},{k:"D7 qualification",v:"Easily met post-sale",c:"green"},{k:"NHR/IFICI",v:"Not available post-sale",c:"red"}]},
+  {h:"Key tax issues",rows:[{k:"Residency at time of sale",v:"CRITICAL — determines tax country",c:"red"},{k:"PT cap gains on sale",v:"28% if PT resident at close",c:"red"},{k:"NIIT (3.8% surtax)",v:"US net investment income",c:"amber"},{k:"QSBS exclusion",v:"Evaluate before move",c:"amber"}]},
+  {h:"Critical actions",rows:[{k:"Do NOT move before analysis",v:"Sale timing is everything"},{k:"Coordinate with M&A counsel",v:"Residency at close date"},{k:"Roth conversions post-sale",v:"If US resident at sale"},{k:"Post-sale estate planning",v:"Significant new wealth event"}]},
+  {h:"Timeline",rows:[{k:"Pre-sale tax planning",v:"2–3 years before"},{k:"Move date vs close date",v:"Coordinate very carefully"},{k:"PT tax counsel",v:"Before any PT residency steps"},{k:"Form 8606 setup",v:"If Roth conversions planned"}]}
+]}
+};
+function loadScenario(k){
+  const s=scenarios[k];
+  if(!s)return;
+  let h=`<div class="alert info" style="margin-bottom:1rem"><strong>${s.title}</strong><br>${s.overview}</div><div class="scenario-grid">`;
+  s.cards.forEach(c=>{
+    h+=`<div class="sc-card"><h4>${c.h}</h4>`;
+    c.rows.forEach(r=>h+=`<div class="sc-row"><span class="sc-key">${r.k}</span><span class="sc-val${r.c?' '+r.c:''}">${r.v}</span></div>`);
+    h+=`</div>`;
+  });
+  h+=`</div>`;
+  document.getElementById('scenario-out').innerHTML=h;
+}
+loadScenario('m62');
+
+// ── timeline ────────────────────────────────────────────────────────────────
+const tlItems=[
+  {mo:-36,u:false,t:"Begin Roth conversion analysis",b:"Pull all Form 8606 records. Build cumulative basis ledger. Model optimal conversion amounts across the available window given current US brackets. Engage US expat CPA now."},
+  {mo:-24,u:true,t:"Execute first Roth conversion tranche",b:"Convert up to the top of current US bracket. Each dollar converted is documented basis — exempt from Portuguese tax on the contribution portion. Do not skip years in the window."},
+  {mo:-18,u:true,t:"Address US brokerage foreign-resident policies",b:"Contact Fidelity, Vanguard, Schwab. Determine whether accounts will be maintained post-move or need transfer. Must be resolved before departure — cannot be easily fixed from Portugal."},
+  {mo:-18,u:false,t:"Roth 401(k) rollover evaluation",b:"If client has a Roth 401(k) or 403(b), evaluate rolling to Roth IRA to consolidate basis tracking into a single Form 8606 record. Simplifies Portuguese annual reporting."},
+  {mo:-12,u:true,t:"Execute second Roth conversion tranche",b:"Continue filling bracket headroom. Each conversion permanently reduces the taxable growth fraction of future Portuguese Roth distributions. Track with Form 8606."},
+  {mo:-12,u:false,t:"Obtain NIF and open Portuguese bank account",b:"NIF via Portuguese consulate in the US. Portuguese bank account required for D7 visa. Some banks accept non-resident applications remotely. Start EUR cash buffer buildup."},
+  {mo:-9,u:true,t:"Engage Portuguese immigration lawyer",b:"AIMA processing times are lengthy. Start D7 visa application 9–12 months before intended move date. Immigration lawyer significantly accelerates the process."},
+  {mo:-9,u:false,t:"Engage Portuguese tax attorney",b:"Establish Roth reporting method (actual basis vs. 85/15) with Portuguese counsel now — before the first Portuguese tax year begins. Also address IRA distribution sizing and treaty treatment."},
+  {mo:-6,u:true,t:"Final Roth conversion tranche — last opportunity",b:"Last chance to convert before establishing Portuguese tax residency. Conversions while a Portuguese resident are an unresolved tax question. Do not convert after this point without specific PT counsel guidance."},
+  {mo:-6,u:true,t:"Formalize state tax domicile exit",b:"CA, NY, IL, and similar states require formal break. Update voter registration, driver's license, bank statements. Document move date clearly. Some states pursue back-taxes aggressively."},
+  {mo:-3,u:true,t:"Secure international health insurance",b:"Required for D7 visa. Medicare does not cover Portugal. Must be in place before departure. Medicare Part B retention decision must also be finalized — 10% annual penalty for each year of non-enrollment if returning to US."},
+  {mo:-3,u:false,t:"Set up FX transfer platform (Wise / OFX)",b:"Create accounts and test a small transfer. Set up recurring monthly transfer for operating expenses. Saves $1,000–$2,000/year vs. traditional bank wire fees."},
+  {mo:0,u:true,t:"Move date — Portuguese tax residency clock starts",b:"183-day rule begins. First Modelo 3 filing due the following June 30. Confirm Roth reporting method with Portuguese counsel immediately. Notify SSA of foreign address."},
+  {mo:1,u:true,t:"Register with AIMA for residency permit",b:"Begin residency permit process on arrival if not pre-completed. Required for SNS healthcare enrollment, certain banking, and eventually citizenship pathway."},
+  {mo:12,u:true,t:"First Portuguese Modelo 3 filing (June 30 deadline)",b:"Declare all worldwide income. Apply Roth basis method consistently (actual or 85/15). Foreign Tax Credit mechanism applies. Engage Portuguese Contabilista for this filing."},
+];
+function buildTimeline(months){
+  months=months||18;
+  const wrap=document.getElementById('tl-wrap');
+  const filtered=tlItems.filter(t=>t.mo>=-months);
+  let h='';
+  filtered.forEach((item,i)=>{
+    const isLast=i===filtered.length-1;
+    const mo=item.mo;
+    const label=mo<0?`${Math.abs(mo)} months before`:mo===0?'Move date':`${mo} month${mo>1?'s':''} after`;
+    const dot=item.u?'var(--red)':'var(--navy-light)';
+    const line=item.u?'#F0AAAA':'#C5CEDF';
+    h+=`<div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot" style="background:${dot}"></div>
+        ${!isLast?`<div class="tl-line" style="background:${line}"></div>`:''}
+      </div>
+      <div class="tl-right">
+        <div class="tl-head">${item.t} <span class="tl-when">${label}</span>${item.u?' <span class="tl-urgent">Time-sensitive</span>':''}</div>
+        <div class="tl-body">${item.b}</div>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML=h;
+}
+buildTimeline(18);
+
+// ── ask the advisor ──────────────────────────────────────────────────────────
+async function askQuestion(){
+  const inp=document.getElementById('ask-input');
+  const box=document.getElementById('answer-box');
+  const q=inp.value.trim();
+  if(!q)return;
+  box.style.display='block';
+  box.className='answer-box loading';
+  box.textContent='Consulting the knowledge base...';
+  try{
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:800,
+        system:`You are a knowledgeable resource for US financial advisors helping clients plan retirement in Portugal. Be specific, practical, and well-organized.
+
+CRITICAL FACTS:
+- NHR program CLOSED March 2025. IFICI (NHR 2.0) requires active qualifying employment — NOT available to passive-income retirees.
+- Standard Portuguese progressive rates apply (13.25% to 48%). Dividends/cap gains: flat 28%.
+- ROTH IRA: Portugal does NOT recognize US tax-free treatment. Under CIRS Article 54: original contributions (basis) are EXEMPT as capital reimbursement; investment GROWTH is taxable as pension income at progressive rates. If basis undocumented, 85% is assumed exempt / 15% taxable (85/15 fallback). Form 8606 is the key documentation. Conversions while a Portuguese resident are an unresolved tax question — convert only pre-departure.
+- US Social Security: taxable ONLY in the US under the treaty — zero Portuguese tax. Most important treaty protection.
+- Traditional IRA/401k: taxable in Portugal at progressive rates as pension income.
+- PFIC rule: no non-US-domiciled investment funds after establishing PT residency.
+- US brokerages (Fidelity, Vanguard, Schwab) may restrict/freeze accounts for foreign residents — must address 12–18 months pre-departure.
+- FBAR required if aggregate foreign accounts exceed $10,000 at any point. FATCA Form 8938 also applies.
+- Medicare does not cover Portugal. Part B dropout = 10% annual re-enrollment penalty.
+- D7 visa: ~€820/month minimum passive income. AIMA handles residency (replaced SEF 2023).
+- Pre-departure Roth conversions: still beneficial — each dollar converted becomes documented basis (exempt in Portugal). The growth component is the taxable part.
+
+Format responses in 3–4 clear paragraphs. Flag anything time-sensitive or commonly overlooked. Never give definitive legal/tax advice — recommend specialist consultation for specifics.`,
+        messages:[{role:"user",content:q}]
+      })
+    });
+    const data=await r.json();
+    const text=data.content?.map(b=>b.text||'').join('')||'Unable to retrieve answer.';
+    box.className='answer-box';
+    box.innerHTML=text.replace(/\n\n/g,'</p><p style="margin-top:.75rem">').replace(/^/,'<p>').replace(/$/,'</p>');
+  }catch(e){
+    box.className='answer-box';
+    box.textContent='Error retrieving answer. Please try again.';
+  }
+}
+function askQ(q){document.getElementById('ask-input').value=q;askQuestion();}
+document.getElementById('ask-input').addEventListener('keydown',e=>{if(e.key==='Enter')askQuestion();});
+</script>
+</body>
+</html>
